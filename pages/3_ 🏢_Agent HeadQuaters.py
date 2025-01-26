@@ -89,37 +89,39 @@ def main():
         "User Management"
     ])
 
-    # Fetch all workflows for use across pages
-    all_workflows = manager.get_workflows()
-    workflow_names = [w['name'] for w in all_workflows['data']] if all_workflows and 'data' in all_workflows else []
-
     if page == "Workflows Overview":
         st.header("Workflow Management")
+        col1, col2 = st.columns(2)
         
-        if workflow_names:
-            selected_workflow = st.selectbox("Select Workflow", workflow_names)
-            selected_workflow_data = next((w for w in all_workflows['data'] if w['name'] == selected_workflow), None)
-            
-            if selected_workflow_data:
-                col1, col2 = st.columns(2)
-                
-                with col1:
-                    st.json(selected_workflow_data)
-                
-                with col2:
-                    st.subheader("Workflow Actions")
-                    current_status = selected_workflow_data['active']
-                    new_status = st.toggle("Active", value=current_status)
-                    
-                    if new_status != current_status:
-                        if st.button("Apply Status Change"):
-                            result = manager.toggle_workflow_status(selected_workflow_data['id'], new_status)
+        with col1:
+            st.subheader("Active Workflows")
+            active_workflows = manager.get_workflows(active=True)
+            if active_workflows and 'data' in active_workflows:
+                for workflow in active_workflows['data']:
+                    with st.expander(workflow['name']):
+                        st.json(workflow)
+                        if st.button(f"Deactivate {workflow['name']}", key=f"deactivate_{workflow['id']}"):
+                            result = manager.toggle_workflow_status(workflow['id'], False)
                             if result:
-                                st.success(f"Workflow status updated to {'active' if new_status else 'inactive'}")
-                            else:
-                                st.error("Failed to update workflow status")
-        else:
-            st.warning("No workflows found")
+                                st.success(f"{workflow['name']} deactivated successfully!")
+                                st.rerun()
+            else:
+                st.warning("No active workflows found")
+        
+        with col2:
+            st.subheader("Inactive Workflows")
+            inactive_workflows = manager.get_workflows(active=False)
+            if inactive_workflows and 'data' in inactive_workflows:
+                for workflow in inactive_workflows['data']:
+                    with st.expander(workflow['name']):
+                        st.json(workflow)
+                        if st.button(f"Activate {workflow['name']}", key=f"activate_{workflow['id']}"):
+                            result = manager.toggle_workflow_status(workflow['id'], True)
+                            if result:
+                                st.success(f"{workflow['name']} activated successfully!")
+                                st.rerun()
+            else:
+                st.warning("No inactive workflows found")
 
     elif page == "Create Workflow":
         st.header("Create New Workflow")
@@ -137,13 +139,11 @@ def main():
 
     elif page == "Workflow Details":
         st.header("Workflow Inspection")
-        selected_workflow = st.selectbox("Select Workflow", workflow_names)
-        if selected_workflow:
-            workflow_data = next((w for w in all_workflows['data'] if w['name'] == selected_workflow), None)
-            if workflow_data:
-                st.json(workflow_data)
-            else:
-                st.warning("Workflow details not found")
+        workflow_id = st.text_input("Enter Workflow ID")
+        if workflow_id:
+            details = manager.get_workflow_details(workflow_id)
+            if details:
+                st.json(details)
 
     elif page == "Executions":
         st.header("Workflow Executions")
@@ -151,15 +151,14 @@ def main():
         col1, col2 = st.columns(2)
         
         with col1:
-            selected_workflow = st.selectbox("Select Workflow", ["All Workflows"] + workflow_names)
+            workflow_id = st.text_input("Filter by Workflow ID (Optional)")
         
         with col2:
-            status = st.selectbox("Execution Status", ["All", "success", "error", "waiting"])
+            status = st.selectbox("Execution Status", ["", "success", "error", "waiting"])
         
-        workflow_id = next((w['id'] for w in all_workflows['data'] if w['name'] == selected_workflow), None) if selected_workflow != "All Workflows" else None
         executions = manager.get_executions(
-            workflow_id=workflow_id, 
-            status=status if status != "All" else None
+            workflow_id=workflow_id or None, 
+            status=status or None
         )
         
         if executions and 'data' in executions:
@@ -198,3 +197,4 @@ def main():
 
 if __name__ == "__main__":
     main()
+
