@@ -1,5 +1,5 @@
 import streamlit as st
-import st_pages # required modules
+import st_pages  # required modules
 
 # Set page config
 st.set_page_config(page_title="TalkNexus - Ollama Chatbot Multi-Model Interface", layout="wide", page_icon="🤖")
@@ -55,6 +55,62 @@ PAGES = {
         "description": "PDF AI Chat Assistant",
         "badge": "Application",
         "color": "var(--highlight-color)"
+    },
+    "🔍 Internet Agent": {
+        "icon": "globe",
+        "func": st_pages.internet_agent,
+        "description": "Search AI Agents",
+        "badge": "Search",
+        "color": "var(--highlight-color)"
+    },
+    "🤝 AI Agent Roster": {
+        "icon": "people",
+        "func": st_pages.agent_roster,
+        "description": "Agent Overview",
+        "badge": "Roster",
+        "color": "var(--primary-color)"
+    },
+    "🏢 Agent Headquarters": {
+        "icon": "building",
+        "func": st_pages.agent_headquarters,
+        "description": "Manage Headquarters",
+        "badge": "Management",
+        "color": "var(--secondary-color)"
+    },
+    "⚙️ Agent Generator": {
+        "icon": "magic",
+        "func": st_pages.agent_generator,
+        "description": "Generate New Agents",
+        "badge": "Generator",
+        "color": "var(--highlight-color)"
+    },
+    "🖋️ Forms": {
+        "icon": "file-text",
+        "func": st_pages.forms,
+        "description": "Create and Manage Forms",
+        "badge": "Forms",
+        "color": "var(--primary-color)"
+    },
+    "🌀 Visual Agent Flow": {
+        "icon": "flow-chart",
+        "func": st_pages.visual_agent_flow,
+        "description": "Flowcharts for Agents",
+        "badge": "Visualization",
+        "color": "var(--secondary-color)"
+    },
+    "📁 Agent Projects": {
+        "icon": "folder",
+        "func": st_pages.agent_projects,
+        "description": "Organize Projects",
+        "badge": "Projects",
+        "color": "var(--highlight-color)"
+    },
+    "📊 Dashboard": {
+        "icon": "bar-chart",
+        "func": st_pages.dashboard,
+        "description": "Performance Overview",
+        "badge": "Dashboard",
+        "color": "var(--primary-color)"
     }
 }
 
@@ -82,7 +138,7 @@ def navigate():
         # Create menu items
         for page, info in PAGES.items():
             selected = st.session_state.current_page == page
-            
+
             # Create the button (invisible but clickable)
             if st.button(
                 f"{page}",
@@ -119,7 +175,7 @@ try:
     if selected_page != st.session_state.current_page:
         st.session_state.current_page = selected_page
         st.rerun()
-    
+
     # Run the selected function
     page_function = PAGES[selected_page]["func"]
     page_function()
