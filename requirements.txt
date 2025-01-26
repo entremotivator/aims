@@ -1,5 +1,4 @@
 pdfkit
-pyaudio
 openpyxl
 pandas
 plotly
