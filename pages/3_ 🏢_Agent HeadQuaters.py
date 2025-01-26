@@ -4,216 +4,234 @@ import json
 import uuid
 from datetime import datetime
 import logging
-import pandas as pd
 
-# Advanced Logging Configuration
-logging.basicConfig(
-    level=logging.INFO, 
-    format='%(asctime)s - %(levelname)s: %(message)s',
-    filename='n8n_workflow_manager.log'
-)
+# Setup logging
+logging.basicConfig(level=logging.DEBUG)
 
-class N8NWorkflowManager:
-    def __init__(self):
-        # Configuration Management
-        self.N8N_HOST = "agentonline-u29564.vm.elestio.app"
-        self.N8N_PORT = ""
-        self.N8N_BASE_PATH = "api/v1"
-        self.API_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiI1NDI5NWRjYS01YTIxLTQzZDMtYTA1OS1jOTA5YTQ5ZjlkYTEiLCJpc3MiOiJuOG4iLCJhdWQiOiJwdWJsaWMtYXBpIiwiaWF0IjoxNzM3MTI2NTEwfQ.R2doAECbp1CCGzebWxG0XMqpA-_WHDM40nauk3tvuO4"
-        
-        # API Endpoint Mapping
-        self.API_URLS = {
-            "workflows": f"{self.N8N_BASE_PATH}/workflows",
-            "executions": f"{self.N8N_BASE_PATH}/executions",
-            "credentials": f"{self.N8N_BASE_PATH}/credentials",
-            "tags": f"{self.N8N_BASE_PATH}/tags",
-            "users": f"{self.N8N_BASE_PATH}/users",
-            "variables": f"{self.N8N_BASE_PATH}/variables"
-        }
+# Define the n8n API base URL and authentication details
+N8N_HOST = "agentonline-u29564.vm.elestio.app"
+N8N_PORT = ""
+N8N_BASE_PATH = "api/v1"
+API_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiI1NDI5NWRjYS01YTIxLTQzZDMtYTA1OS1jOTA5YTQ5ZjlkYTEiLCJpc3MiOiJuOG4iLCJhdWQiOiJwdWJsaWMtYXBpIiwiaWF0IjoxNzM3MTI2NTEwfQ.R2doAECbp1CCGzebWxG0XMqpA-_WHDM40nauk3tvuO4"
 
-    def make_api_request(self, method, endpoint, headers=None, data=None, params=None):
-        """Enhanced API request method with comprehensive error handling."""
-        url = f"http://{self.N8N_HOST}:{self.N8N_PORT}/{endpoint}"
-        headers = headers or {"accept": "application/json", "X-N8N-API-KEY": self.API_KEY}
-        
-        try:
-            # Dynamically select request method
-            request_methods = {
-                "GET": requests.get,
-                "POST": requests.post,
-                "PATCH": requests.patch,
-                "DELETE": requests.delete
-            }
-            
-            response = request_methods[method](
-                url, 
-                headers=headers, 
-                json=data, 
-                params=params
-            )
-            
-            # Advanced error handling
-            response.raise_for_status()
-            return response.json()
-        
-        except requests.RequestException as e:
-            logging.error(f"API Request Error: {e}")
-            st.error(f"API Request Failed: {e}")
-            return None
-        except json.JSONDecodeError:
-            logging.error("Failed to decode JSON response")
-            st.error("Invalid JSON response from server")
-            return None
+# n8n API URLs
+API_URLS = {
+    "workflows": f"{N8N_BASE_PATH}/workflows",
+    "executions": f"{N8N_BASE_PATH}/executions",
+    "credentials": f"{N8N_BASE_PATH}/credentials",
+    "tags": f"{N8N_BASE_PATH}/tags",
+    "users": f"{N8N_BASE_PATH}/users",
+    "variables": f"{N8N_BASE_PATH}/variables"
+}
 
-    def fetch_workflows(self, active=True, search_query=None, limit=50, cursor=None):
-        """Comprehensive workflow fetching with advanced filtering."""
-        params = {
-            "active": str(active).lower(),
-            "limit": limit
-        }
-        
-        if search_query:
-            params["search"] = search_query
-        if cursor:
-            params["cursor"] = cursor
-        
-        return self.make_api_request("GET", self.API_URLS["workflows"], params=params)
+def make_api_request(method, endpoint, headers=None, data=None, params=None):
+    url = f"http://{N8N_HOST}:{N8N_PORT}/{endpoint}"
+    headers = headers or {"accept": "application/json", "X-N8N-API-KEY": API_KEY}
+    try:
+        if method == "GET":
+            response = requests.get(url, headers=headers, params=params)
+        elif method == "PATCH":
+            response = requests.patch(url, headers=headers, json=data)
+        elif method == "POST":
+            response = requests.post(url, headers=headers, json=data)
+        elif method == "DELETE":
+            response = requests.delete(url, headers=headers)
+        else:
+            raise ValueError("Invalid HTTP method")
+        response.raise_for_status()
+        return response.json()
+    except requests.RequestException as e:
+        logging.error(f"API error: {e}")
+        st.error(f"API error: {e}")
+        return None
 
-    def fetch_workflow_details(self, workflow_id):
-        """Retrieve comprehensive workflow details."""
-        return self.make_api_request("GET", f"{self.API_URLS['workflows']}/{workflow_id}")
+# Enhanced Fetch Workflows with Pagination and Search
+def fetch_workflows(cursor=None, limit=10, search_query=None):
+    params = {"active": "true", "limit": limit}
+    if cursor:
+        params["cursor"] = cursor
+    if search_query:
+        params["search"] = search_query
+    return make_api_request("GET", API_URLS["workflows"], params=params)
 
-    def create_workflow(self, name, nodes=None, connections=None, active=True, tags=None):
-        """Advanced workflow creation with optional configurations."""
-        data = {
-            "name": name,
-            "active": active,
-            "nodes": nodes or [],
-            "connections": connections or {},
-            "tags": tags or []
-        }
-        return self.make_api_request("POST", self.API_URLS["workflows"], data=data)
+def fetch_workflow_by_id(workflow_id):
+    return make_api_request("GET", f"{API_URLS['workflows']}/{workflow_id}")
 
-    def update_workflow(self, workflow_id, update_data):
-        """Flexible workflow update method."""
-        return self.make_api_request("PATCH", f"{self.API_URLS['workflows']}/{workflow_id}", data=update_data)
+def toggle_workflow_status(workflow_id, status):
+    data = {"active": status}
+    return make_api_request("PATCH", f"{API_URLS['workflows']}/{workflow_id}", data=data)
 
-    def delete_workflow(self, workflow_id):
-        """Workflow deletion with logging."""
-        result = self.make_api_request("DELETE", f"{self.API_URLS['workflows']}/{workflow_id}")
-        if result:
-            logging.info(f"Workflow {workflow_id} deleted successfully")
-        return result
+def create_workflow(name, active):
+    data = {
+        "name": name,
+        "active": active,
+    }
+    return make_api_request("POST", API_URLS["workflows"], data=data)
 
-    def fetch_executions(self, workflow_id=None, status=None, limit=50):
-        """Advanced execution tracking with multiple filters."""
-        params = {"limit": limit}
-        
-        if workflow_id:
-            params["workflowId"] = workflow_id
-        if status:
-            params["status"] = status
-        
-        return self.make_api_request("GET", self.API_URLS["executions"], params=params)
+def delete_workflow(workflow_id):
+    return make_api_request("DELETE", f"{API_URLS['workflows']}/{workflow_id}")
 
-def main():
-    st.set_page_config(
-        page_title="n8n Workflow Management", 
-        page_icon="🤖", 
-        layout="wide"
-    )
+def fetch_executions(workflow_id=None, limit=10):
+    params = {"limit": limit}
+    if workflow_id:
+        params["workflowId"] = workflow_id
+    return make_api_request("GET", API_URLS["executions"], params=params)
+
+def fetch_variables():
+    return make_api_request("GET", API_URLS["variables"])
+
+def create_update_variable(key, value):
+    data = {"key": key, "value": value}
+    return make_api_request("POST", API_URLS["variables"], data=data)
+
+# Enhanced Fetch Users and Tags
+def fetch_users():
+    return make_api_request("GET", API_URLS["users"])
+
+def fetch_tags():
+    return make_api_request("GET", API_URLS["tags"])
+
+# Streamlit App Layout
+st.title("n8n Workflow Manager")
+
+page = st.sidebar.radio("Navigation", ["View Workflows", "Manage Workflow", "Executions", "Variables", "Create Workflow", "Upload Workflow", "View Users", "View Tags"])
+
+# View Workflows with Search Functionality and Pagination
+if page == "View Workflows":
+    st.subheader("Active Workflows:")
+    search_query = st.text_input("Search for workflows (optional)")
+    cursor = None
+    all_workflows = []
+    while True:
+        result = fetch_workflows(cursor, search_query=search_query)
+        if result and "data" in result:
+            all_workflows.extend(result["data"])
+            cursor = result.get("nextCursor")
+            if not cursor:
+                break
+        else:
+            break
     
-    manager = N8NWorkflowManager()
-    
-    # Advanced Sidebar Navigation
-    st.sidebar.title("🔧 Workflow Management")
-    page = st.sidebar.radio("Navigation", [
-        "Dashboard", 
-        "Workflow Explorer", 
-        "Create Workflow", 
-        "Workflow Details", 
-        "Execution Tracker", 
-        "Tags & Users"
-    ])
-
-    # Dashboard Page
-    if page == "Dashboard":
-        st.title("n8n Workflow Management Dashboard")
-        
-        col1, col2 = st.columns(2)
-        
-        with col1:
-            st.subheader("Active Workflows")
-            active_workflows = manager.fetch_workflows(active=True, limit=10)
-            if active_workflows and 'data' in active_workflows:
-                df = pd.DataFrame(active_workflows['data'])
-                st.dataframe(df[['name', 'id', 'createdAt']])
-        
-        with col2:
-            st.subheader("Recent Executions")
-            recent_executions = manager.fetch_executions(limit=10)
-            if recent_executions and 'data' in recent_executions:
-                df = pd.DataFrame(recent_executions['data'])
-                st.dataframe(df[['id', 'status', 'startedAt']])
-
-    # Workflow Explorer Page
-    elif page == "Workflow Explorer":
-        st.header("Workflow Explorer")
-        
-        search_query = st.text_input("Search Workflows")
-        active_filter = st.checkbox("Show Active Workflows", value=True)
-        
-        workflows = manager.fetch_workflows(
-            active=active_filter, 
-            search_query=search_query, 
-            limit=50
-        )
-        
-        if workflows and 'data' in workflows:
-            for workflow in workflows['data']:
-                with st.expander(f"{workflow['name']} (ID: {workflow['id']})"):
-                    st.json(workflow)
-
-    # Create Workflow Page
-    elif page == "Create Workflow":
-        st.header("Create New Workflow")
-        
-        with st.form("workflow_creation"):
-            name = st.text_input("Workflow Name")
-            active = st.checkbox("Active", value=True)
-            tags = st.multiselect("Select Tags", 
-                ["Automation", "Data Processing", "Integration", "Custom"])
-            
-            nodes = st.text_area("Workflow Nodes (JSON)", height=200)
-            connections = st.text_area("Workflow Connections (JSON)", height=200)
-            
-            submitted = st.form_submit_button("Create Workflow")
-            
-            if submitted:
-                try:
-                    parsed_nodes = json.loads(nodes) if nodes else None
-                    parsed_connections = json.loads(connections) if connections else None
-                    
-                    result = manager.create_workflow(
-                        name, 
-                        nodes=parsed_nodes, 
-                        connections=parsed_connections, 
-                        active=active, 
-                        tags=tags
-                    )
-                    
-                    if result:
-                        st.success("Workflow created successfully!")
-                        st.json(result)
+    if all_workflows:
+        for workflow in all_workflows:
+            with st.expander(f"Workflow: {workflow['name']} ({workflow['id']})"):
+                st.write(f"**Status**: {'Active' if workflow['active'] else 'Inactive'}")
+                st.write(f"**Created At**: {workflow['createdAt']}")
+                st.write(f"**Updated At**: {workflow['updatedAt']}")
+                if st.button(f"Delete {workflow['name']}", key=f"delete_{workflow['id']}"):
+                    if delete_workflow(workflow['id']):
+                        st.success(f"Workflow {workflow['name']} deleted successfully!")
                     else:
-                        st.error("Failed to create workflow")
-                
-                except json.JSONDecodeError:
-                    st.error("Invalid JSON for nodes or connections")
+                        st.error(f"Failed to delete workflow {workflow['name']}")
+    else:
+        st.warning("No workflows found.")
 
-    # Rest of the implementation would follow similar patterns...
+# Manage Workflow with Improved Status Update and Node View
+elif page == "Manage Workflow":
+    st.subheader("Manage Workflow")
+    workflow_id = st.text_input("Enter Workflow ID:")
+    if workflow_id:
+        workflow = fetch_workflow_by_id(workflow_id)
+        if workflow:
+            st.write(f"### Workflow: {workflow['name']}")
+            st.write(f"**Status**: {'Active' if workflow['active'] else 'Inactive'}")
+            new_status = st.radio("Set Workflow Status", ["Activate", "Deactivate"], index=0 if workflow["active"] else 1)
+            if st.button("Update Workflow Status"):
+                result = toggle_workflow_status(workflow_id, new_status == "Activate")
+                if result:
+                    st.success("Workflow status updated successfully!")
+            
+            st.write("### Workflow Nodes:")
+            for node in workflow.get("nodes", []):
+                with st.expander(f"Node: {node.get('name')}"):
+                    st.write(f"**Type**: {node.get('type')}")
+                    st.write(f"**Position**: {node.get('position')}")
+                    st.write(f"**Disabled**: {node.get('disabled')}")
+        else:
+            st.warning(f"Workflow with ID {workflow_id} not found.")
 
-    # Add error handling, comprehensive logging, and advanced features
+# Enhanced Execution View with Pagination
+elif page == "Executions":
+    st.subheader("Workflow Executions")
+    workflow_id = st.text_input("Enter Workflow ID (optional):")
+    limit = st.slider("Number of Executions to Display", 1, 50, 10)
+    executions = fetch_executions(workflow_id, limit)
+    if executions and "data" in executions:
+        for execution in executions["data"]:
+            with st.expander(f"Execution: {execution['id']}"):
+                st.write(f"**Status**: {execution['status']}")
+                st.write(f"**Started At**: {execution['startedAt']}")
+                st.write(f"**Finished At**: {execution['stoppedAt']}")
+                st.write(f"**Mode**: {execution['mode']}")
+    else:
+        st.warning("No executions found.")
 
-if __name__ == "__main__":
-    main()
+# Manage Variables with Update Option and List View
+elif page == "Variables":
+    st.subheader("Manage Variables")
+    variables = fetch_variables()
+    if variables and "data" in variables:
+        for variable in variables["data"]:
+            st.write(f"**{variable['key']}**: {variable['value']}")
+    
+    st.write("### Create/Update Variable")
+    key = st.text_input("Variable Key:")
+    value = st.text_input("Variable Value:")
+    if st.button("Save Variable"):
+        result = create_update_variable(key, value)
+        if result:
+            st.success("Variable saved successfully!")
+        else:
+            st.error("Failed to save variable.")
+
+# Create New Workflow with Validation
+elif page == "Create Workflow":
+    st.subheader("Create New Workflow")
+    name = st.text_input("Enter Workflow Name:")
+    active = st.checkbox("Activate Workflow", value=True)
+    if st.button("Create Workflow"):
+        if not name:
+            st.error("Please provide a workflow name.")
+        else:
+            result = create_workflow(name, active)
+            if result:
+                st.success("Workflow created successfully!")
+                st.json(result)
+            else:
+                st.error("Failed to create workflow.")
+
+# Upload Workflow with API Integration
+elif page == "Upload Workflow":
+    st.subheader("Upload Workflow")
+    api_url = st.text_input("API URL", "http://localhost:5678/rest/workflows")
+    auth_type = st.selectbox("Authentication Type", ["Basic", "JWT"])
+    if auth_type == "Basic":
+        username = st.text_input("Username")
+        password = st.text_input("Password", type="password")
+        credentials = f"{username}:{password}".encode('utf-8').decode('latin1')
+    elif auth_type == "JWT":
+        jwt_token = st.text_input("JWT Token", type="password")
+        credentials = jwt_token
+    
+    uploaded_file = st.file_uploader("Choose a .json file", type="json")
+    if uploaded_file is not None:
+        file_content = json.load(uploaded_file)
+        if st.button("Upload Workflow"):
+            result, error = upload_workflow(file_content, api_url, auth_type, credentials)
+            if result:
+                st.success("Workflow uploaded successfully!")
+            else:
+                st.error(f"Failed to upload workflow: {error}")
+
+# Handle Users and Tags
+elif page == "View Users":
+    st.subheader("View Users")
+    users = fetch_users()
+    if users:
+        st.write(users)
+
+elif page == "View Tags":
+    st.subheader("View Tags")
+    tags = fetch_tags()
+    if tags:
+        st.write(tags)
