@@ -1,6 +1,6 @@
 import streamlit as st
 import st_pages  # required modules
-from st pages.home import home
+from st_pages.home import home
 
 # Set page config
 st.set_page_config(page_title="TalkNexus - Ollama Chatbot Multi-Model Interface", layout="wide", page_icon="🤖")
