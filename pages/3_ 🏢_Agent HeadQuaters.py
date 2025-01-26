@@ -35,14 +35,37 @@ class N8NWorkflowManager:
             st.error(f"API Error: {e}")
             return None
 
-    def get_users(self):
-        """Fetch detailed user information."""
-        return self.make_request("GET", "users")
+    def get_workflows(self, active=None, search=None, limit=50):
+        """Fetch workflows with optional filtering."""
+        params = {"limit": limit}
+        if active is not None:
+            params["active"] = str(active).lower()
+        if search:
+            params["search"] = search
+        return self.make_request("GET", "workflows", params=params)
 
-    def update_user_status(self, user_id, active):
-        """Update user activation status."""
-        data = {"active": active}
-        return self.make_request("PATCH", f"users/{user_id}", data=data)
+    def get_workflow_details(self, workflow_id):
+        """Retrieve detailed information for a specific workflow."""
+        return self.make_request("GET", f"workflows/{workflow_id}")
+
+    def create_workflow(self, name, nodes=None, connections=None, active=True, tags=None):
+        """Create a new workflow with optional configuration."""
+        data = {
+            "name": name,
+            "active": active,
+            "nodes": nodes or [],
+            "connections": connections or {},
+            "tags": tags or []
+        }
+        return self.make_request("POST", "workflows", data=data)
+
+    def update_workflow(self, workflow_id, data):
+        """Update existing workflow details."""
+        return self.make_request("PATCH", f"workflows/{workflow_id}", data=data)
+
+    def delete_workflow(self, workflow_id):
+        """Delete a specific workflow."""
+        return self.make_request("DELETE", f"workflows/{workflow_id}")
 
     def get_executions(self, workflow_id=None, status=None, limit=50):
         """Fetch workflow executions with optional filtering."""
@@ -52,6 +75,14 @@ class N8NWorkflowManager:
         if status:
             params["status"] = status
         return self.make_request("GET", "executions", params=params)
+
+    def get_tags(self):
+        """Retrieve all available tags."""
+        return self.make_request("GET", "tags")
+
+    def get_users(self):
+        """Fetch user information."""
+        return self.make_request("GET", "users")
 
 def main():
     st.set_page_config(page_title="n8n Workflow Manager", layout="wide")
@@ -65,48 +96,50 @@ def main():
         "Create Workflow", 
         "Workflow Details", 
         "Executions", 
+        "Tags Management", 
         "User Management"
     ])
 
-    if page == "User Management":
-        st.header("User Management")
-        users = manager.get_users()
+    # Page-specific Content Rendering
+    if page == "Workflows Overview":
+        st.header("Workflow Management")
+        col1, col2 = st.columns(2)
         
-        if users and 'data' in users:
-            st.subheader("Agent List")
+        with col1:
+            st.subheader("Active Workflows")
+            active_workflows = manager.get_workflows(active=True)
+            if active_workflows and 'data' in active_workflows:
+                for workflow in active_workflows['data']:
+                    st.expander(workflow['name']).write(json.dumps(workflow, indent=2))
+        
+        with col2:
+            st.subheader("Inactive Workflows")
+            inactive_workflows = manager.get_workflows(active=False)
+            if inactive_workflows and 'data' in inactive_workflows:
+                for workflow in inactive_workflows['data']:
+                    st.expander(workflow['name']).write(json.dumps(workflow, indent=2))
+
+    elif page == "Create Workflow":
+        st.header("Create New Workflow")
+        with st.form("workflow_creation"):
+            name = st.text_input("Workflow Name")
+            active = st.checkbox("Active", value=True)
+            tags = st.multiselect("Select Tags", ["Automation", "Data Processing", "Integration"])
+            submitted = st.form_submit_button("Create Workflow")
             
-            # Create columns for display
-            cols = st.columns([2, 2, 1, 1])
-            cols[0].write("**Agent Name**")
-            cols[1].write("**Agent ID**")
-            cols[2].write("**Status**")
-            cols[3].write("**Actions**")
-            
-            for user in users['data']:
-                # Create columns for each user
-                cols = st.columns([2, 2, 1, 1])
-                
-                # Display user name
-                cols[0].write(user.get('name', 'N/A'))
-                
-                # Display user ID
-                cols[1].write(str(user.get('id', 'N/A')))
-                
-                # Display current status
-                status = "Active" if user.get('active', False) else "Inactive"
-                cols[2].write(status)
-                
-                # Toggle activation button
-                toggle_key = f"toggle_{user.get('id')}"
-                if cols[3].button(f"{'Deactivate' if user.get('active', False) else 'Activate'}", key=toggle_key):
-                    new_status = not user.get('active', False)
-                    result = manager.update_user_status(user.get('id'), new_status)
-                    if result:
-                        st.success(f"User {user.get('name')} {'activated' if new_status else 'deactivated'}")
-                    else:
-                        st.error("Failed to update user status")
-        else:
-            st.warning("No users found")
+            if submitted:
+                result = manager.create_workflow(name, active=active, tags=tags)
+                if result:
+                    st.success("Workflow created successfully!")
+                    st.json(result)
+
+    elif page == "Workflow Details":
+        st.header("Workflow Inspection")
+        workflow_id = st.text_input("Enter Workflow ID")
+        if workflow_id:
+            details = manager.get_workflow_details(workflow_id)
+            if details:
+                st.json(details)
 
     elif page == "Executions":
         st.header("Workflow Executions")
@@ -155,7 +188,19 @@ def main():
         else:
             st.warning("No executions found")
 
-    # Previous pages remain the same...
+    elif page == "Tags Management":
+        st.header("Tags Overview")
+        tags = manager.get_tags()
+        if tags and 'data' in tags:
+            for tag in tags['data']:
+                st.write(f"**{tag['name']}**")
+
+    elif page == "User Management":
+        st.header("User Information")
+        users = manager.get_users()
+        if users and 'data' in users:
+            for user in users['data']:
+                st.write(f"**{user['email']}**")
 
 if __name__ == "__main__":
     main()
