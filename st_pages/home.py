@@ -1,153 +1,230 @@
 import streamlit as st
+import st_pages  # required modules
 
-def display_model_capabilities():
-    """Displays model capabilities section"""
-    st.markdown("### Install Ollama API")
-    
-    # Styled download button for Ollama installation
-    st.markdown("""
-        <p> After download PC Restart may be necessary.</p>
-        <a href="https://ollama.com/download" target="_blank" class="custom-download-button2">
-            Download Ollama
-        </a>
-    """, unsafe_allow_html=True)
+# Set page config
+st.set_page_config(page_title="TalkNexus - Ollama Chatbot Multi-Model Interface", layout="wide", page_icon="🤖")
 
-    st.markdown("---")
+# Load custom CSS from file
+def load_css(file_name):
+    with open(file_name) as f:
+        st.markdown(f'<style>{f.read()}</style>', unsafe_allow_html=True)
 
-    st.markdown("## Examples of Relevant Models: Capabilities & Specializations")
-    
-    capabilities = {
-        "Language Models": {
-            "Llama 3.2": {
-                "capabilities": ["General Purpose AI", "Text Generation", "Code Completion"],
-                "description": "Versatile model optimized for broad applications and reasoning tasks",
-                "icon": "🦙",
-                "tags": ["7B-70B", "Versatile", "High Performance"]
-            },
-            "Gemma 2": {
-                "capabilities": ["Research", "Mathematical Reasoning", "Efficient Inference"],
-                "description": "Google's efficient model focused on research and mathematical tasks",
-                "icon": "💎",
-                "tags": ["2B-7B", "Efficient", "Research-Oriented"]
-            }
-        },
-        "Specialized Models": {
-            "Phi 3": {
-                "capabilities": ["Code Generation", "Scientific Tasks", "Educational Use"],
-                "description": "Microsoft's compact model optimized for coding and scientific applications",
-                "icon": "🔬",
-                "tags": ["3.8B", "Compact", "Scientific"]
-            },
-            "Mistral": {
-                "capabilities": ["Text Generation", "Code Completion", "Analysis"],
-                "description": "Advanced model with state-of-the-art performance in multiple domains",
-                "icon": "🌪️",
-                "tags": ["7B", "Advanced", "Multi-domain"]
-            }
-        },
-        "Task-Specific Models": {
-            "Moondream 2": {
-                "capabilities": ["Vision-Language Tasks", "Image Understanding", "Visual Analysis"],
-                "description": "Specialized in vision-language understanding and processing",
-                "icon": "🌙",
-                "tags": ["1.4B", "Vision-Language", "Lightweight"]
-            },
-            "Neural Chat": {
-                "capabilities": ["Conversational AI", "Task Completion", "User Assistance"],
-                "description": "Optimized for natural conversations and user interactions",
-                "icon": "💬",
-                "tags": ["7B", "Conversational", "User-friendly"]
-            }
-        },
-        "Domain-Specific Models": {
-            "Code Llama": {
-                "capabilities": ["Code Generation", "Programming Tasks", "Technical Documentation"],
-                "description": "Specialized in software development and coding tasks",
-                "icon": "👨‍💻",
-                "tags": ["7B", "Coding", "Development"]
-            },
-            "Solar": {
-                "capabilities": ["Scientific Computing", "Research Tasks", "Technical Analysis"],
-                "description": "Focused on scientific applications and research tasks",
-                "icon": "☀️",
-                "tags": ["10.7B", "Scientific", "Research"]
-            }
-        }
+load_css('styles.css')
+
+# Initialize session state
+if 'current_page' not in st.session_state:
+    st.session_state.current_page = "Home"
+
+# Header
+st.markdown(f"""
+<div class="header">
+    <div class="animated-bg"></div>
+    <div class="header-content">
+        <h1 class="header-title">Ollama Chatbot Multi-Model Interface</h1> 
+        <p class="header-subtitle">Advanced Language Models & Intelligent Conversations</p>
+    </div>
+</div>
+""", unsafe_allow_html=True)
+
+# Enhanced pages definition
+PAGES = {
+    "Home": {
+        "icon": "house-door",
+        "func": st_pages.home,
+        "description": "Guidelines & Overview",
+        "badge": "Informative",
+        "color": "var(--primary-color)"
+    },
+    "Agent Chat": {
+        "icon": "chat-dots",
+        "func": "pages.💭Agent Chat",
+        "description": "Chat with AI Agents",
+        "badge": "Application",
+        "color": "var(--highlight-color)"
+    },
+    "Dashboard": {
+        "icon": "bar-chart",
+        "func": "pages.1_📊Dashboard",
+        "description": "Interactive Data Overview",
+        "badge": "Analytics",
+        "color": "var(--secondary-color)"
+    },
+    "Agent Projects": {
+        "icon": "folder",
+        "func": "pages.2_ 📁_Agent Projects",
+        "description": "Manage Agent Projects",
+        "badge": "Management",
+        "color": "var(--primary-color)"
+    },
+    "Internet Agent": {
+        "icon": "search",
+        "func": "pages.2_🔍_Internet Agent",
+        "description": "Web-Savvy AI Agents",
+        "badge": "Exploration",
+        "color": "var(--highlight-color)"
+    },
+    "AI Agent Roster": {
+        "icon": "person-workspace",
+        "func": "pages.2_🧑‍💻_AI Agent Roster",
+        "description": "AI Agent Directory",
+        "badge": "Information",
+        "color": "var(--secondary-color)"
+    },
+    "Agent Headquarters": {
+        "icon": "building",
+        "func": "pages.3_ 🏢_Agent HeadQuaters",
+        "description": "AI Base of Operations",
+        "badge": "HQ",
+        "color": "var(--primary-color)"
+    },
+    "Agent Generator": {
+        "icon": "gear",
+        "func": "pages.3_⚙️_Agent Generator",
+        "description": "Create Custom Agents",
+        "badge": "Tool",
+        "color": "var(--highlight-color)"
+    },
+    "LLM Agents": {
+        "icon": "robot",
+        "func": "pages.3_🛋_LLM Agents",
+        "description": "Large Language Models",
+        "badge": "Application",
+        "color": "var(--secondary-color)"
+    },
+    "LLM Library": {
+        "icon": "book",
+        "func": "pages.3_📚LLM Libary",
+        "description": "Central Model Repository",
+        "badge": "Library",
+        "color": "var(--primary-color)"
+    },
+    "Agent Command": {
+        "icon": "command",
+        "func": "pages.3_🧠Agent Command",
+        "description": "Control AI Agents",
+        "badge": "Command",
+        "color": "var(--highlight-color)"
+    },
+    "Agent Tool Library": {
+        "icon": "tool",
+        "func": "pages.3_🧠Agent Tool Libary",
+        "description": "Comprehensive Toolset",
+        "badge": "Tools",
+        "color": "var(--secondary-color)"
+    },
+    "Forms": {
+        "icon": "pencil",
+        "func": "pages.✍️ Forms",
+        "description": "Manage Data Collection",
+        "badge": "Forms",
+        "color": "var(--primary-color)"
+    },
+    "Visual Agent Flow": {
+        "icon": "circle-fill",
+        "func": "pages.🔀 Visual Agent Flow",
+        "description": "Visualize AI Workflows",
+        "badge": "Visualization",
+        "color": "var(--highlight-color)"
+    },
+    "Content Agents": {
+        "icon": "file-earmark-text",
+        "func": "pages.📁 Content Agents",
+        "description": "AI Content Generation",
+        "badge": "Content",
+        "color": "var(--secondary-color)"
+    },
+    "Active Agents": {
+        "icon": "battery-charging",
+        "func": "pages.🔋 Active Agents",
+        "description": "Monitor Agent Activity",
+        "badge": "Activity",
+        "color": "var(--primary-color)"
+    },
+    "Format Agents": {
+        "icon": "file-code",
+        "func": "pages.🤖 Format Agents",
+        "description": "Formatting Assistance",
+        "badge": "Tools",
+        "color": "var(--highlight-color)"
     }
+}
 
-    # Display models by category
-    for category, models in capabilities.items():
-        st.markdown(f"### {category}")
-        cols = st.columns(2)
-        
-        for idx, (model_name, details) in enumerate(models.items()):
-            with cols[idx % 2]:
-                st.markdown(f"""
-                <div class="capability-card">
-                    <div class="model-header">
-                        <div class="model-icon">{details['icon']}</div>
-                        <div class="model-name">{model_name}</div>
-                    </div>
-                    <p class="model-description">{details['description']}</p>
-                    <div class="capability-tags">
-                        {' '.join(f'<span class="capability-tag">{tag}</span>' for tag in details['tags'])}
-                    </div>
-                    <div class="capabilities-list">
-                        <small><strong>Key Capabilities:</strong></small><br>
-                        {' • '.join(details['capabilities'])}
+st.markdown("""
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css">
+""", unsafe_allow_html=True)
+
+def navigate():
+    with st.sidebar:
+        st.markdown('''
+        <a href="https://github.com/TsLu1s/talknexus" target="_blank" style="text-decoration: none; color: inherit; display: block;">
+            <div class="header-container" style="cursor: pointer;">
+                <div class="profile-section">
+                    <div class="profile-info">
+                        <h1 style="font-size: 32px;">TalkNexus</h1>
+                        <span class="active-badge" style="font-size: 16px;">AI Chatbot Multi-Model Application</span>
                     </div>
                 </div>
-                """, unsafe_allow_html=True)
+            </div>
+        </a>
+        ''', unsafe_allow_html=True)
 
-def run():
-    
-    # Main title
-    st.markdown('''
-    <p class="header-subtitle">
-    🤖 Explore and Analyze State-Of-The-Art Open-Source Language Models
-    </p>
-    ''', unsafe_allow_html=True)
+        st.markdown('---')
 
-    # Create tabs
-    tab1, tab2 = st.tabs(["📊 Ollama Model Ecosystem", "📚 References & Documentation"])
+        # Create menu items
+        for page, info in PAGES.items():
+            selected = st.session_state.current_page == page
 
-    with tab1:
-       
-        # Display model capabilities
-        display_model_capabilities()
+            # Create the button (invisible but clickable)
+            if st.button(
+                f"{page}",
+                key=f"nav_{page}",
+                use_container_width=True,
+                type="secondary" if selected else "primary"
+            ):
+                st.session_state.current_page = page
+                st.rerun()
 
-        st.markdown("---")
-        
-        # Hardware Requirements
-        st.markdown("### Hardware Requirements")
-        st.markdown(
-        """
-        <div style='padding: 1rem; background-color: #374B5D; color: white; border-radius: 0.5rem'>
-        <p>
-        Minimum RAM requirements by model size:
-        <ul>
-        <li>1B-7B models: 8GB RAM</li>
-        <li>8B-13B models: 16GB RAM</li>
-        <li>14B-33B models: 32GB RAM</li>
-        <li>34B+ models: 64GB+ RAM</li>
-        </ul>
-        Note: GPU acceleration (optional) can significantly improve inference speed.
-        </p>
-        </div>
-        """, 
-        unsafe_allow_html=True
-        )
-        st.markdown("---")
+            # Visual menu item
+            st.markdown(f"""
+                <div class="menu-item {'selected' if selected else ''}">
+                    <div class="menu-icon">
+                        <i class="bi bi-{info['icon']}"></i>
+                    </div>
+                    <div class="menu-content">
+                        <div class="menu-title">{page}</div>
+                        <div class="menu-description">{info['description']}</div>
+                    </div>
+                    <div class="menu-badge">{info['badge']}</div>
+                </div>
+            """, unsafe_allow_html=True)
 
-    with tab2:
-        pass 
+        # Close navigation container
+        st.markdown('</div>', unsafe_allow_html=True)
 
-    # References section
-    st.markdown("""
-    ### 📚 References & Documentation
-    
-    - [Ollama Model Library](https://ollama.com/library)
-    - [Ollama GitHub Repository](https://github.com/ollama/ollama)
-    - [Installation Guide](https://ollama.ai/download)
-    - [API Documentation](https://github.com/ollama/ollama/blob/main/docs/api.md)
-    """)
+        return st.session_state.current_page
+
+# Get selected page and run its function
+try:
+    selected_page = navigate()
+    # Update session state
+    if selected_page != st.session_state.current_page:
+        st.session_state.current_page = selected_page
+        st.rerun()
+
+    # Run the selected function
+    page_function = PAGES[selected_page]["func"]
+    page_function()
+except Exception as e:
+    st.error(f"Error loading page: {str(e)}")
+    st_pages.home.run()
+
+# Display the footer
+st.markdown("""
+<div class="footer">
+    <div class="footer-content">
+        <p>© 2024 Powered by <a href="https://github.com/TsLu1s" target="_blank">TsLu1s</a>. 
+        Advanced Language Models & Intelligent Conversations
+        | Project Source: <a href="https://github.com/TsLu1s/talknexus" target="_blank"> TalkNexus</a></p>
+    </div>
+</div>
+""", unsafe_allow_html=True)
