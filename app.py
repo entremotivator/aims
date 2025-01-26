@@ -1,127 +1,139 @@
 import streamlit as st
-from PIL import Image
-import os
+import st_pages # required modules
 
-# Verify and load the image
-image_path = os.path.join(
-    "/Users/donmenicohudson/Downloads/AGENTSYSTEM", "agent.png"
-)
-assert os.path.exists(image_path), f"File not found: {image_path}"
-image = Image.open(image_path)
+# Set page config
+st.set_page_config(page_title="TalkNexus - Ollama Chatbot Multi-Model Interface", layout="wide", page_icon="🤖")
 
-# Page Configuration
-st.set_page_config(
-    page_title="AI Agent Management Systems",
-    page_icon="🤖",
-    layout="wide",
-    initial_sidebar_state="expanded"
-)
+# Load custom CSS from file
+def load_css(file_name):
+    with open(file_name) as f:
+        st.markdown(f'<style>{f.read()}</style>', unsafe_allow_html=True)
 
-# Load CSS Styles
-def load_css():
-    st.markdown("""
-        <style>
-        body {
-            font-family: 'Arial', sans-serif;
-        }
-        .header {
-            background: linear-gradient(45deg, #1e3c72, #2a5298);
-            padding: 1.5rem;
-            border-radius: 10px;
-            margin-bottom: 2rem;
-            color: white;
-            text-align: center;
-        }
-        .header img {
-            max-width: 100px;
-            border-radius: 50%;
-        }
-        .header h1 {
-            margin-top: 10px;
-            font-size: 2rem;
-        }
-        .card {
-            background: white;
-            border: 1px solid #ddd;
-            border-radius: 10px;
-            padding: 1.5rem;
-            margin-bottom: 1rem;
-            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
-            transition: 0.3s ease;
-        }
-        .card:hover {
-            box-shadow: 0 6px 12px rgba(0,0,0,0.2);
-        }
-        .card-title {
-            font-size: 1.25rem;
-            margin-bottom: 0.5rem;
-            font-weight: bold;
-        }
-        .card-content {
-            font-size: 1rem;
-            color: #555;
-        }
-        .sidebar .menu-item {
-            margin-bottom: 1rem;
-            padding: 0.75rem;
-            font-size: 1rem;
-            border-radius: 8px;
-            background: #f8f9fa;
-            transition: 0.3s;
-        }
-        .sidebar .menu-item:hover {
-            background: #e9ecef;
-        }
-        </style>
-    """, unsafe_allow_html=True)
+load_css('styles.css')
 
-# Load CSS
-load_css()
+# Initialize session state
+if 'current_page' not in st.session_state:
+    st.session_state.current_page = "Home"
 
-# Sidebar Navigation
-st.sidebar.image(image, width=150)
-st.sidebar.title("AI Agent Management")
-st.sidebar.markdown("---")
+# Header
+st.markdown(f"""
+<div class="header">
+    <div class="animated-bg"></div>
+    <div class="header-content">
+        <h1 class="header-title">Ollama Chatbot Multi-Model Interface</h1> 
+        <p class="header-subtitle">Advanced Language Models & Intelligent Conversations</p>
+    </div>
+</div>
+""", unsafe_allow_html=True)
 
-# Define Pages
+# Enhanced pages definition
 PAGES = {
-    "Logs Overview": "View logs and recent activities",
-    "Agent Management": "Manage and configure AI agents",
-    "System Status": "Monitor system health and usage",
+    "Home": {
+        "icon": "house-door",
+        "func": st_pages.home,
+        "description": "Guidelines & Overview",
+        "badge": "Informative",
+        "color": "var(--primary-color)"
+    },
+    "Language Models Management": {
+        "icon": "gear",
+        "func": st_pages.model_management,
+        "description": "Download Models",
+        "badge": "Configurations",
+        "color": "var(--secondary-color)"
+    },
+    "AI Conversation": {
+        "icon": "chat-dots",
+        "func": st_pages.ai_chatbot,
+        "description": "Interactive AI Chat",
+        "badge": "Application",
+        "color": "var(--highlight-color)"
+    },
+    "RAG Conversation": {
+        "icon": "chat-dots",
+        "func": st_pages.rag_chat,
+        "description": "PDF AI Chat Assistant",
+        "badge": "Application",
+        "color": "var(--highlight-color)"
+    }
 }
 
-for page, description in PAGES.items():
-    if st.sidebar.button(page):
-        st.write(f"### {page}")
-        st.write(description)
-
-# Main Header
 st.markdown("""
-    <div class="header">
-        <img src="data:image/png;base64,{}" alt="Agent Logo">
-        <h1>AI Agent Management Systems</h1>
-    </div>
-""".format(base64.b64encode(image.tobytes()).decode("utf-8")), unsafe_allow_html=True)
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css">
+""", unsafe_allow_html=True)
 
-# Log Overview Section
-st.write("## Logs Overview")
-log_entries = [
-    {"time": "2025-01-19 14:23:12", "entry": "Agent Alpha completed Task 132."},
-    {"time": "2025-01-19 14:25:10", "entry": "System health check passed."},
-    {"time": "2025-01-19 14:30:02", "entry": "New agent Omega added to roster."},
-]
+def navigate():
+    with st.sidebar:
+        st.markdown('''
+        <a href="https://github.com/TsLu1s/talknexus" target="_blank" style="text-decoration: none; color: inherit; display: block;">
+            <div class="header-container" style="cursor: pointer;">
+                <div class="profile-section">
+                    <div class="profile-info">
+                        <h1 style="font-size: 32px;">TalkNexus</h1>
+                        <span class="active-badge" style="font-size: 16px;">AI Chatbot Multi-Model Application</span>
+                    </div>
+                </div>
+            </div>
+        </a>
+        ''', unsafe_allow_html=True)
 
-for log in log_entries:
-    st.markdown(f"""
-        <div class="card">
-            <div class="card-title">Timestamp: {log['time']}</div>
-            <div class="card-content">{log['entry']}</div>
-        </div>
-    """, unsafe_allow_html=True)
+        st.markdown('---')
 
-# Footer
+        # Create menu items
+        for page, info in PAGES.items():
+            selected = st.session_state.current_page == page
+            
+            # Create the button (invisible but clickable)
+            if st.button(
+                f"{page}",
+                key=f"nav_{page}",
+                use_container_width=True,
+                type="secondary" if selected else "primary"
+            ):
+                st.session_state.current_page = page
+                st.rerun()
+
+            # Visual menu item
+            st.markdown(f"""
+                <div class="menu-item {'selected' if selected else ''}">
+                    <div class="menu-icon">
+                        <i class="bi bi-{info['icon']}"></i>
+                    </div>
+                    <div class="menu-content">
+                        <div class="menu-title">{page}</div>
+                        <div class="menu-description">{info['description']}</div>
+                    </div>
+                    <div class="menu-badge">{info['badge']}</div>
+                </div>
+            """, unsafe_allow_html=True)
+
+        # Close navigation container
+        st.markdown('</div>', unsafe_allow_html=True)
+        
+        return st.session_state.current_page
+
+# Get selected page and run its function
+try:
+    selected_page = navigate()
+    # Update session state
+    if selected_page != st.session_state.current_page:
+        st.session_state.current_page = selected_page
+        st.rerun()
+    
+    # Run the selected function
+    page_function = PAGES[selected_page]["func"]
+    page_function()
+except Exception as e:
+    st.error(f"Error loading page: {str(e)}")
+    st_pages.home.run()
+
+# Display the footer
 st.markdown("""
-    <div class="footer">
-        © 2025 AI Agent Management Systems. All rights reserved.
+<div class="footer">
+    <div class="footer-content">
+        <p>© 2024 Powered by <a href="https://github.com/TsLu1s" target="_blank">TsLu1s </a>. 
+        Advanced Language Models & Intelligent Conversations
+        | Project Source: <a href="https://github.com/TsLu1s/talknexus" target="_blank"> TalkNexus</p>
     </div>
+</div>
 """, unsafe_allow_html=True)
