@@ -18,16 +18,9 @@ class N8NWorkflowManager:
         }
 
     def make_request(self, method, endpoint, data=None, params=None):
-        """Generic API request method with error handling."""
         try:
             url = f"{self.BASE_URL}/{endpoint}"
-            response = requests.request(
-                method, 
-                url, 
-                headers=self.HEADERS, 
-                json=data, 
-                params=params
-            )
+            response = requests.request(method, url, headers=self.HEADERS, json=data, params=params)
             response.raise_for_status()
             return response.json()
         except requests.exceptions.RequestException as e:
@@ -36,7 +29,6 @@ class N8NWorkflowManager:
             return None
 
     def get_workflows(self, active=None, search=None, limit=50):
-        """Fetch workflows with optional filtering."""
         params = {"limit": limit}
         if active is not None:
             params["active"] = str(active).lower()
@@ -45,11 +37,9 @@ class N8NWorkflowManager:
         return self.make_request("GET", "workflows", params=params)
 
     def get_workflow_details(self, workflow_id):
-        """Retrieve detailed information for a specific workflow."""
         return self.make_request("GET", f"workflows/{workflow_id}")
 
     def create_workflow(self, name, nodes=None, connections=None, active=True, tags=None):
-        """Create a new workflow with optional configuration."""
         data = {
             "name": name,
             "active": active,
@@ -60,15 +50,12 @@ class N8NWorkflowManager:
         return self.make_request("POST", "workflows", data=data)
 
     def update_workflow(self, workflow_id, data):
-        """Update existing workflow details."""
         return self.make_request("PATCH", f"workflows/{workflow_id}", data=data)
 
     def delete_workflow(self, workflow_id):
-        """Delete a specific workflow."""
         return self.make_request("DELETE", f"workflows/{workflow_id}")
 
     def get_executions(self, workflow_id=None, status=None, limit=50):
-        """Fetch workflow executions with optional filtering."""
         params = {"limit": limit}
         if workflow_id:
             params["workflowId"] = workflow_id
@@ -77,12 +64,14 @@ class N8NWorkflowManager:
         return self.make_request("GET", "executions", params=params)
 
     def get_tags(self):
-        """Retrieve all available tags."""
         return self.make_request("GET", "tags")
 
     def get_users(self):
-        """Fetch user information."""
         return self.make_request("GET", "users")
+
+    def toggle_workflow_status(self, workflow_id, active):
+        data = {"active": active}
+        return self.make_request("PATCH", f"workflows/{workflow_id}", data=data)
 
 def main():
     st.set_page_config(page_title="n8n Workflow Manager", layout="wide")
@@ -100,24 +89,37 @@ def main():
         "User Management"
     ])
 
-    # Page-specific Content Rendering
+    # Fetch all workflows for use across pages
+    all_workflows = manager.get_workflows()
+    workflow_names = [w['name'] for w in all_workflows['data']] if all_workflows and 'data' in all_workflows else []
+
     if page == "Workflows Overview":
         st.header("Workflow Management")
-        col1, col2 = st.columns(2)
         
-        with col1:
-            st.subheader("Active Workflows")
-            active_workflows = manager.get_workflows(active=True)
-            if active_workflows and 'data' in active_workflows:
-                for workflow in active_workflows['data']:
-                    st.expander(workflow['name']).write(json.dumps(workflow, indent=2))
-        
-        with col2:
-            st.subheader("Inactive Workflows")
-            inactive_workflows = manager.get_workflows(active=False)
-            if inactive_workflows and 'data' in inactive_workflows:
-                for workflow in inactive_workflows['data']:
-                    st.expander(workflow['name']).write(json.dumps(workflow, indent=2))
+        if workflow_names:
+            selected_workflow = st.selectbox("Select Workflow", workflow_names)
+            selected_workflow_data = next((w for w in all_workflows['data'] if w['name'] == selected_workflow), None)
+            
+            if selected_workflow_data:
+                col1, col2 = st.columns(2)
+                
+                with col1:
+                    st.json(selected_workflow_data)
+                
+                with col2:
+                    st.subheader("Workflow Actions")
+                    current_status = selected_workflow_data['active']
+                    new_status = st.toggle("Active", value=current_status)
+                    
+                    if new_status != current_status:
+                        if st.button("Apply Status Change"):
+                            result = manager.toggle_workflow_status(selected_workflow_data['id'], new_status)
+                            if result:
+                                st.success(f"Workflow status updated to {'active' if new_status else 'inactive'}")
+                            else:
+                                st.error("Failed to update workflow status")
+        else:
+            st.warning("No workflows found")
 
     elif page == "Create Workflow":
         st.header("Create New Workflow")
@@ -135,32 +137,32 @@ def main():
 
     elif page == "Workflow Details":
         st.header("Workflow Inspection")
-        workflow_id = st.text_input("Enter Workflow ID")
-        if workflow_id:
-            details = manager.get_workflow_details(workflow_id)
-            if details:
-                st.json(details)
+        selected_workflow = st.selectbox("Select Workflow", workflow_names)
+        if selected_workflow:
+            workflow_data = next((w for w in all_workflows['data'] if w['name'] == selected_workflow), None)
+            if workflow_data:
+                st.json(workflow_data)
+            else:
+                st.warning("Workflow details not found")
 
     elif page == "Executions":
         st.header("Workflow Executions")
         
-        # Filtering options
         col1, col2 = st.columns(2)
         
         with col1:
-            workflow_id = st.text_input("Filter by Workflow ID (Optional)")
+            selected_workflow = st.selectbox("Select Workflow", ["All Workflows"] + workflow_names)
         
         with col2:
-            status = st.selectbox("Execution Status", ["", "success", "error", "waiting"])
+            status = st.selectbox("Execution Status", ["All", "success", "error", "waiting"])
         
-        # Fetch executions
+        workflow_id = next((w['id'] for w in all_workflows['data'] if w['name'] == selected_workflow), None) if selected_workflow != "All Workflows" else None
         executions = manager.get_executions(
-            workflow_id=workflow_id or None, 
-            status=status or None
+            workflow_id=workflow_id, 
+            status=status if status != "All" else None
         )
         
         if executions and 'data' in executions:
-            # Create columns for display
             cols = st.columns([2, 2, 2, 1])
             cols[0].write("**Workflow Name**")
             cols[1].write("**Execution ID**")
@@ -168,22 +170,10 @@ def main():
             cols[3].write("**Status**")
             
             for execution in executions['data']:
-                # Create columns for each execution
                 cols = st.columns([2, 2, 2, 1])
-                
-                # Workflow name (if available)
-                workflow_name = execution.get('workflowName', 'N/A')
-                cols[0].write(workflow_name)
-                
-                # Execution ID
+                cols[0].write(execution.get('workflowName', 'N/A'))
                 cols[1].write(str(execution.get('id', 'N/A')))
-                
-                # Execution time details
-                start_time = execution.get('startedAt', 'N/A')
-                stop_time = execution.get('stoppedAt', 'N/A')
-                cols[2].write(f"Start: {start_time}\nStop: {stop_time}")
-                
-                # Execution status
+                cols[2].write(f"Start: {execution.get('startedAt', 'N/A')}\nStop: {execution.get('stoppedAt', 'N/A')}")
                 cols[3].write(execution.get('status', 'N/A'))
         else:
             st.warning("No executions found")
@@ -194,6 +184,8 @@ def main():
         if tags and 'data' in tags:
             for tag in tags['data']:
                 st.write(f"**{tag['name']}**")
+        else:
+            st.warning("No tags found")
 
     elif page == "User Management":
         st.header("User Information")
@@ -201,6 +193,8 @@ def main():
         if users and 'data' in users:
             for user in users['data']:
                 st.write(f"**{user['email']}**")
+        else:
+            st.warning("No users found")
 
 if __name__ == "__main__":
     main()
