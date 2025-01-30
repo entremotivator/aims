@@ -184,7 +184,7 @@ def main():
             st.warning("No workflows found")
 
     elif page == "Executions":
-    st.header("Workflow Executions")
+    ("Workflow Executions")
     
     col1, col2, col3 = st.columns(3)
     
