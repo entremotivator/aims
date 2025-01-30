@@ -1,6 +1,5 @@
 import streamlit as st
-import st_pages  # required modules
-
+import st_pages
 
 # Set page config
 st.set_page_config(page_title="AI Agent MS - Ollama Chatbot Multi-Model Interface", layout="wide", page_icon="🤖")
@@ -202,7 +201,7 @@ def navigate():
         # Close navigation container
         st.markdown('</div>', unsafe_allow_html=True)
 
-        return st.session_state.current_page
+    return st.session_state.current_page
 
 # Get selected page and run its function
 try:
