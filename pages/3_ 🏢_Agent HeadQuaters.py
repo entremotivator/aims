@@ -184,7 +184,7 @@ def main():
             st.warning("No workflows found")
 
     elif page == "Executions":
-    ("Workflow Executions")
+    st.header("Workflow Executions")
     
     col1, col2, col3 = st.columns(3)
     
@@ -194,10 +194,10 @@ def main():
         selected_workflow = st.selectbox("Select Workflow", workflow_names)
     
     with col2:
-        status = st.selectbox("Execution Status", ["All", "error", "success", "waiting"])
+        status = st.selectbox("Execution Status", ["All", "success", "error", "waiting"])
     
     with col3:
-        limit = st.number_input("Number of executions to show", min_value=1, max_value=200, value=100)
+        limit = st.number_input("Number of executions to show", min_value=1, max_value=100, value=50)
     
     workflow_id = next((w['id'] for w in workflows['data'] if w['name'] == selected_workflow), None) if selected_workflow != "All Workflows" else None
     executions = manager.get_executions(
@@ -211,55 +211,18 @@ def main():
         df['startedAt'] = pd.to_datetime(df['startedAt'])
         df['duration'] = pd.to_timedelta(df['stoppedAt']) - pd.to_timedelta(df['startedAt'])
         
-        st.subheader("Execution Details")
-        st.dataframe(df[['id', 'workflowId', 'workflowName', 'status', 'startedAt', 'duration']])
+        st.dataframe(df[['id', 'workflowName', 'status', 'startedAt', 'duration']])
         
-        st.subheader("Error Analysis")
-        error_df = df[df['status'] == 'error']
-        if not error_df.empty:
-            for _, row in error_df.iterrows():
-                with st.expander(f"Error in {row['workflowName']} (ID: {row['id']})"):
-                    st.write(f"**Workflow ID:** {row['workflowId']}")
-                    st.write(f"**Started At:** {row['startedAt']}")
-                    st.write(f"**Duration:** {row['duration']}")
-                    st.write("**Error Details:**")
-                    st.json(row['data'].get('resultData', {}).get('error', 'No detailed error information available'))
-        else:
-            st.info("No errors found in the current selection.")
+        # Visualizations
+        st.subheader("Execution Status Distribution")
+        fig = px.pie(df, names='status', title='Execution Status Distribution')
+        st.plotly_chart(fig)
         
-        st.subheader("Execution Visualizations")
-        col1, col2 = st.columns(2)
-        
-        with col1:
-            st.write("Status Distribution")
-            fig = px.pie(df, names='status', title='Execution Status Distribution')
-            st.plotly_chart(fig)
-        
-        with col2:
-            st.write("Execution Duration Over Time")
-            fig = px.scatter(df, x='startedAt', y='duration', color='status', hover_data=['workflowName', 'id'],
-                             title='Execution Duration Over Time')
-            st.plotly_chart(fig)
-        
-        st.subheader("Workflow Performance")
-        workflow_stats = df.groupby('workflowName').agg({
-            'id': 'count',
-            'duration': 'mean',
-            'status': lambda x: (x == 'error').sum() / len(x) * 100
-        }).reset_index()
-        workflow_stats.columns = ['Workflow Name', 'Total Executions', 'Avg Duration', 'Error Rate (%)']
-        workflow_stats['Avg Duration'] = workflow_stats['Avg Duration'].dt.total_seconds().round(2)
-        workflow_stats['Error Rate (%)'] = workflow_stats['Error Rate (%)'].round(2)
-        st.dataframe(workflow_stats)
-        
-        st.subheader("Top 5 Workflows by Execution Count")
-        top_workflows = workflow_stats.nlargest(5, 'Total Executions')
-        fig = px.bar(top_workflows, x='Workflow Name', y='Total Executions', text='Total Executions',
-                     title='Top 5 Workflows by Execution Count')
+        st.subheader("Execution Duration Over Time")
+        fig = px.scatter(df, x='startedAt', y='duration', color='status', title='Execution Duration Over Time')
         st.plotly_chart(fig)
     else:
         st.warning("No executions found")
-
 
     elif page == "Analytics":
         st.header("Workflow Analytics")
