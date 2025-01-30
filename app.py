@@ -34,119 +34,136 @@ PAGES = {
         "func": st_pages.home,
         "description": "Guidelines & Overview",
         "badge": "Informative",
-        "color": "var(--primary-color)"
+        "color": "var(--primary-color)",
+        "url": "https://zrnrpwtg4wkiz7hgcbsl3a.streamlit.app/"
     },
     "Agent Chat": {
         "icon": "chat-dots",
         "func": "pages.💭Agent Chat",
         "description": "Chat with AI Agents",
         "badge": "Application",
-        "color": "var(--highlight-color)"
+        "color": "var(--highlight-color)",
+        "url": "https://zrnrpwtg4wkiz7hgcbsl3a.streamlit.app/Agent_Chat"
     },
     "Dashboard": {
         "icon": "bar-chart",
         "func": "pages.1_📊Dashboard",
         "description": "Interactive Data Overview",
         "badge": "Analytics",
-        "color": "var(--secondary-color)"
+        "color": "var(--secondary-color)",
+        "url": "https://zrnrpwtg4wkiz7hgcbsl3a.streamlit.app/Dashboard"
     },
     "Agent Projects": {
         "icon": "folder",
         "func": "pages.2_ 📁_Agent Projects",
         "description": "Manage Agent Projects",
         "badge": "Management",
-        "color": "var(--primary-color)"
+        "color": "var(--primary-color)",
+        "url": "https://zrnrpwtg4wkiz7hgcbsl3a.streamlit.app/Agent_Projects"
     },
     "Internet Agent": {
         "icon": "search",
         "func": "pages.2_🔍_Internet Agent",
         "description": "Web-Savvy AI Agents",
         "badge": "Exploration",
-        "color": "var(--highlight-color)"
+        "color": "var(--highlight-color)",
+        "url": "https://zrnrpwtg4wkiz7hgcbsl3a.streamlit.app/Internet_Agent"
     },
     "AI Agent Roster": {
         "icon": "person-workspace",
         "func": "pages.2_🧑‍💻_AI Agent Roster",
         "description": "AI Agent Directory",
         "badge": "Information",
-        "color": "var(--secondary-color)"
+        "color": "var(--secondary-color)",
+        "url": "https://zrnrpwtg4wkiz7hgcbsl3a.streamlit.app/AI_Agent_Roster"
     },
     "Agent Headquarters": {
         "icon": "building",
         "func": "pages.3_ 🏢_Agent HeadQuaters",
         "description": "AI Base of Operations",
         "badge": "HQ",
-        "color": "var(--primary-color)"
+        "color": "var(--primary-color)",
+        "url": "https://zrnrpwtg4wkiz7hgcbsl3a.streamlit.app/Agent_Headquarters"
     },
     "Agent Generator": {
         "icon": "gear",
         "func": "pages.3_⚙️_Agent Generator",
         "description": "Create Custom Agents",
         "badge": "Tool",
-        "color": "var(--highlight-color)"
+        "color": "var(--highlight-color)",
+        "url": "https://zrnrpwtg4wkiz7hgcbsl3a.streamlit.app/Agent_Generator"
     },
     "LLM Agents": {
         "icon": "robot",
         "func": "pages.3_🛋_LLM Agents",
         "description": "Large Language Models",
         "badge": "Application",
-        "color": "var(--secondary-color)"
+        "color": "var(--secondary-color)",
+        "url": "https://zrnrpwtg4wkiz7hgcbsl3a.streamlit.app/LLM_Agents"
     },
     "LLM Library": {
         "icon": "book",
         "func": "pages.3_📚LLM Libary",
         "description": "Central Model Repository",
         "badge": "Library",
-        "color": "var(--primary-color)"
+        "color": "var(--primary-color)",
+        "url": "https://zrnrpwtg4wkiz7hgcbsl3a.streamlit.app/LLM_Library"
     },
     "Agent Command": {
         "icon": "command",
         "func": "pages.3_🧠Agent Command",
         "description": "Control AI Agents",
         "badge": "Command",
-        "color": "var(--highlight-color)"
+        "color": "var(--highlight-color)",
+        "url": "https://zrnrpwtg4wkiz7hgcbsl3a.streamlit.app/Agent_Command"
     },
     "Agent Tool Library": {
         "icon": "tool",
         "func": "pages.3_🧠Agent Tool Libary",
         "description": "Comprehensive Toolset",
         "badge": "Tools",
-        "color": "var(--secondary-color)"
+        "color": "var(--secondary-color)",
+        "url": "https://zrnrpwtg4wkiz7hgcbsl3a.streamlit.app/Agent_Tool_Library"
     },
     "Forms": {
         "icon": "pencil",
         "func": "pages.✍️ Forms",
         "description": "Manage Data Collection",
         "badge": "Forms",
-        "color": "var(--primary-color)"
+        "color": "var(--primary-color)",
+        "url": "https://zrnrpwtg4wkiz7hgcbsl3a.streamlit.app/Forms"
     },
     "Visual Agent Flow": {
         "icon": "circle-fill",
         "func": "pages.🔀 Visual Agent Flow",
         "description": "Visualize AI Workflows",
         "badge": "Visualization",
-        "color": "var(--highlight-color)"
+        "color": "var(--highlight-color)",
+        "url": "https://zrnrpwtg4wkiz7hgcbsl3a.streamlit.app/Visual_Agent_Flow"
     },
     "Content Agents": {
         "icon": "file-earmark-text",
         "func": "pages.📁 Content Agents",
         "description": "AI Content Generation",
         "badge": "Content",
-        "color": "var(--secondary-color)"
+        "color": "var(--secondary-color)",
+        "url": "https://zrnrpwtg4wkiz7hgcbsl3a.streamlit.app/Content_Agents"
     },
     "Active Agents": {
         "icon": "battery-charging",
         "func": "pages.🔋 Active Agents",
         "description": "Monitor Agent Activity",
         "badge": "Activity",
-        "color": "var(--primary-color)"
+        "color": "var(--primary-color)",
+        "url": "https://zrnrpwtg4wkiz7hgcbsl3a.streamlit.app/Active_Agents"
     },
     "Format Agents": {
         "icon": "file-code",
         "func": "pages.🤖 Format Agents",
         "description": "Formatting Assistance",
         "badge": "Tools",
-        "color": "var(--highlight-color)"
+        "color": "var(--highlight-color)",
+        "url": "https://zrnrpwtg4wkiz7hgcbsl3a.streamlit.app/Format_Agents"
     }
 }
 
@@ -171,23 +188,20 @@ def navigate():
 
         st.markdown('---')
 
-        # Create menu items
+        # Create menu items at the top of the sidebar
         for page, info in PAGES.items():
-            selected = st.session_state.current_page == page
-
-            # Create the button (invisible but clickable)
             if st.button(
                 f"{page}",
                 key=f"nav_{page}",
                 use_container_width=True,
-                type="secondary" if selected else "primary"
+                type="secondary" if st.session_state.current_page == page else "primary"
             ):
                 st.session_state.current_page = page
-                st.rerun()
+                st.experimental_set_query_params(page=page)
+                st.experimental_rerun()
 
-            # Visual menu item
             st.markdown(f"""
-                <div class="menu-item {'selected' if selected else ''}">
+                <div class="menu-item {'selected' if st.session_state.current_page == page else ''}">
                     <div class="menu-icon">
                         <i class="bi bi-{info['icon']}"></i>
                     </div>
@@ -199,22 +213,17 @@ def navigate():
                 </div>
             """, unsafe_allow_html=True)
 
-        # Close navigation container
-        st.markdown('</div>', unsafe_allow_html=True)
-
     return st.session_state.current_page
 
 # Get selected page and run its function
 try:
     selected_page = navigate()
-    # Update session state
     if selected_page != st.session_state.current_page:
         st.session_state.current_page = selected_page
-        st.rerun()
+        st.experimental_rerun()
 
-    # Run the selected function
-    page_function = PAGES[selected_page]["func"]
-    page_function()
+    # Redirect to the selected page
+    st.markdown(f'<meta http-equiv="refresh" content="0;url={PAGES[selected_page]["url"]}">', unsafe_allow_html=True)
 except Exception as e:
     st.error(f"Error loading page: {str(e)}")
     st.pages.home.run()
