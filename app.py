@@ -1,5 +1,6 @@
 import streamlit as st
 import st_pages
+from src import st_pages
 
 # Set page config
 st.set_page_config(page_title="AI Agent MS - Ollama Chatbot Multi-Model Interface", layout="wide", page_icon="🤖")
