@@ -6,7 +6,6 @@ from datetime import datetime, timedelta
 import pandas as pd
 import plotly.express as px
 
-# Configuration and Logging Setup
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s: %(message)s')
 
 class N8NWorkflowManager:
@@ -170,7 +169,7 @@ def main():
             if workflow:
                 st.json(workflow)
                 if st.button("Delete Workflow"):
-                    if st.button(f"Are you sure you want to delete {workflow['name']}?"):
+                    if st.confirm(f"Are you sure you want to delete {workflow['name']}?"):
                         result = manager.delete_workflow(workflow['id'])
                         if result:
                             st.success(f"{workflow['name']} deleted successfully!")
