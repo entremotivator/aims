@@ -217,7 +217,7 @@ try:
     page_function()
 except Exception as e:
     st.error(f"Error loading page: {str(e)}")
-    pages.home.run()
+    st.pages.home.run()
 
 # Display the footer
 st.markdown("""
