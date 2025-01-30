@@ -31,7 +31,6 @@ sentence-transformers==3.3.1
 faiss-cpu==1.9.0
 nltk==3.9.1
 pypdf==5.1.0
-pyaudio
 streamlit-webrtc
 pydub
 
