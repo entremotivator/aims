@@ -11,7 +11,6 @@ logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s: %(m
 
 class N8NWorkflowManager:
     def __init__(self):
-        # Configuration
         self.BASE_URL = "http://agentonline-u29564.vm.elestio.app/api/v1"
         self.API_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiI1NDI5NWRjYS01YTIxLTQzZDMtYTA1OS1jOTA5YTQ5ZjlkYTEiLCJpc3MiOiJuOG4iLCJhdWQiOiJwdWJsaWMtYXBpIiwiaWF0IjoxNzM3ODkxNTI0fQ.-JwLzCmtMVUcQ8NJTny6czBp963T8yJFtg_-S3RPxXo"
         self.HEADERS = {
@@ -82,7 +81,7 @@ class N8NWorkflowManager:
             "workflowId": workflow_id,
             "startedAfter": start_date.isoformat(),
             "startedBefore": end_date.isoformat(),
-            "limit": 1000  # Adjust as needed
+            "limit": 1000
         }
         executions = self.make_request("GET", "executions", params=params)
         if executions and 'data' in executions:
@@ -95,7 +94,6 @@ def main():
 
     st.title("🔧 n8n Workflow Management Dashboard")
     
-    # Sidebar Navigation
     page = st.sidebar.radio("Navigation", [
         "Workflows Overview", 
         "Create Workflow", 
@@ -147,11 +145,10 @@ def main():
             active = st.checkbox("Active", value=True)
             tags = st.multiselect("Select Tags", ["Automation", "Data Processing", "Integration"])
             
-            # Simple node creation
             st.subheader("Add Nodes")
             node_types = ["HTTP Request", "Function", "IF", "Switch", "Email"]
             nodes = []
-            for i in range(3):  # Allow up to 3 nodes for simplicity
+            for i in range(3):
                 node_type = st.selectbox(f"Node {i+1} Type", [""] + node_types, key=f"node_type_{i}")
                 if node_type:
                     nodes.append({"type": node_type, "name": f"{node_type} {i+1}"})
@@ -173,7 +170,7 @@ def main():
             if workflow:
                 st.json(workflow)
                 if st.button("Delete Workflow"):
-                    if st.confirm(f"Are you sure you want to delete {workflow['name']}?"):
+                    if st.button(f"Are you sure you want to delete {workflow['name']}?"):
                         result = manager.delete_workflow(workflow['id'])
                         if result:
                             st.success(f"{workflow['name']} deleted successfully!")
@@ -184,45 +181,44 @@ def main():
             st.warning("No workflows found")
 
     elif page == "Executions":
-    st.header("Workflow Executions")
-    
-    col1, col2, col3 = st.columns(3)
-    
-    with col1:
-        workflows = manager.get_workflows()
-        workflow_names = ["All Workflows"] + [w['name'] for w in workflows['data']] if workflows and 'data' in workflows else ["All Workflows"]
-        selected_workflow = st.selectbox("Select Workflow", workflow_names)
-    
-    with col2:
-        status = st.selectbox("Execution Status", ["All", "success", "error", "waiting"])
-    
-    with col3:
-        limit = st.number_input("Number of executions to show", min_value=1, max_value=100, value=50)
-    
-    workflow_id = next((w['id'] for w in workflows['data'] if w['name'] == selected_workflow), None) if selected_workflow != "All Workflows" else None
-    executions = manager.get_executions(
-        workflow_id=workflow_id, 
-        status=status if status != "All" else None,
-        limit=limit
-    )
-    
-    if executions and 'data' in executions:
-        df = pd.DataFrame(executions['data'])
-        df['startedAt'] = pd.to_datetime(df['startedAt'])
-        df['duration'] = pd.to_timedelta(df['stoppedAt']) - pd.to_timedelta(df['startedAt'])
+        st.header("Workflow Executions")
         
-        st.dataframe(df[['id', 'workflowName', 'status', 'startedAt', 'duration']])
+        col1, col2, col3 = st.columns(3)
         
-        # Visualizations
-        st.subheader("Execution Status Distribution")
-        fig = px.pie(df, names='status', title='Execution Status Distribution')
-        st.plotly_chart(fig)
+        with col1:
+            workflows = manager.get_workflows()
+            workflow_names = ["All Workflows"] + [w['name'] for w in workflows['data']] if workflows and 'data' in workflows else ["All Workflows"]
+            selected_workflow = st.selectbox("Select Workflow", workflow_names)
         
-        st.subheader("Execution Duration Over Time")
-        fig = px.scatter(df, x='startedAt', y='duration', color='status', title='Execution Duration Over Time')
-        st.plotly_chart(fig)
-    else:
-        st.warning("No executions found")
+        with col2:
+            status = st.selectbox("Execution Status", ["All", "success", "error", "waiting"])
+        
+        with col3:
+            limit = st.number_input("Number of executions to show", min_value=1, max_value=100, value=50)
+        
+        workflow_id = next((w['id'] for w in workflows['data'] if w['name'] == selected_workflow), None) if selected_workflow != "All Workflows" else None
+        executions = manager.get_executions(
+            workflow_id=workflow_id, 
+            status=status if status != "All" else None,
+            limit=limit
+        )
+        
+        if executions and 'data' in executions:
+            df = pd.DataFrame(executions['data'])
+            df['startedAt'] = pd.to_datetime(df['startedAt'])
+            df['duration'] = pd.to_timedelta(df['stoppedAt']) - pd.to_timedelta(df['startedAt'])
+            
+            st.dataframe(df[['id', 'workflowName', 'status', 'startedAt', 'duration']])
+            
+            st.subheader("Execution Status Distribution")
+            fig = px.pie(df, names='status', title='Execution Status Distribution')
+            st.plotly_chart(fig)
+            
+            st.subheader("Execution Duration Over Time")
+            fig = px.scatter(df, x='startedAt', y='duration', color='status', title='Execution Duration Over Time')
+            st.plotly_chart(fig)
+        else:
+            st.warning("No executions found")
 
     elif page == "Analytics":
         st.header("Workflow Analytics")
@@ -269,7 +265,6 @@ def main():
             with st.form("create_tag"):
                 new_tag_name = st.text_input("New Tag Name")
                 if st.form_submit_button("Create Tag"):
-                    # Implement tag creation logic here
                     st.success(f"Tag '{new_tag_name}' created successfully!")
         else:
             st.warning("No tags found")
