@@ -180,44 +180,44 @@ def main():
             st.warning("No workflows found")
 
     elif page == "Executions":
-    st.header("Workflow Executions")
-    
-    col1, col2, col3 = st.columns(3)
-    
-    with col1:
-        workflows = manager.get_workflows()
-        workflow_names = ["All Workflows"] + [w['name'] for w in workflows['data']] if workflows and 'data' in workflows else ["All Workflows"]
-        selected_workflow = st.selectbox("Select Workflow", workflow_names)
-    
-    with col2:
-        status = st.selectbox("Execution Status", ["All", "success", "error", "waiting"])
-    
-    with col3:
-        limit = st.number_input("Number of executions to show", min_value=1, max_value=100, value=50)
-    
-    workflow_id = next((w['id'] for w in workflows['data'] if w['name'] == selected_workflow), None) if selected_workflow != "All Workflows" else None
-    executions = manager.get_executions(
-        workflow_id=workflow_id, 
-        status=status if status != "All" else None,
-        limit=limit
-    )
-    
-    if executions and 'data' in executions:
-        df = pd.DataFrame(executions['data'])
-        df['startedAt'] = pd.to_datetime(df['startedAt'])
-        df['duration'] = pd.to_timedelta(df['stoppedAt']) - pd.to_timedelta(df['startedAt'])
+        st.header("Workflow Executions")
         
-        st.dataframe(df[['id', 'workflowName', 'status', 'startedAt', 'duration']])
+        col1, col2, col3 = st.columns(3)
         
-        st.subheader("Execution Status Distribution")
-        fig = px.pie(df, names='status', title='Execution Status Distribution')
-        st.plotly_chart(fig)
+        with col1:
+            workflows = manager.get_workflows()
+            workflow_names = ["All Workflows"] + [w['name'] for w in workflows['data']] if workflows and 'data' in workflows else ["All Workflows"]
+            selected_workflow = st.selectbox("Select Workflow", workflow_names)
         
-        st.subheader("Execution Duration Over Time")
-        fig = px.scatter(df, x='startedAt', y='duration', color='status', title='Execution Duration Over Time')
-        st.plotly_chart(fig)
-    else:
-        st.warning("No executions found")
+        with col2:
+            status = st.selectbox("Execution Status", ["All", "success", "error", "waiting"])
+        
+        with col3:
+            limit = st.number_input("Number of executions to show", min_value=1, max_value=100, value=50)
+        
+        workflow_id = next((w['id'] for w in workflows['data'] if w['name'] == selected_workflow), None) if selected_workflow != "All Workflows" else None
+        executions = manager.get_executions(
+            workflow_id=workflow_id, 
+            status=status if status != "All" else None,
+            limit=limit
+        )
+        
+        if executions and 'data' in executions:
+            df = pd.DataFrame(executions['data'])
+            df['startedAt'] = pd.to_datetime(df['startedAt'])
+            df['duration'] = pd.to_timedelta(df['stoppedAt']) - pd.to_timedelta(df['startedAt'])
+            
+            st.dataframe(df[['id', 'workflowName', 'status', 'startedAt', 'duration']])
+            
+            st.subheader("Execution Status Distribution")
+            fig = px.pie(df, names='status', title='Execution Status Distribution')
+            st.plotly_chart(fig)
+            
+            st.subheader("Execution Duration Over Time")
+            fig = px.scatter(df, x='startedAt', y='duration', color='status', title='Execution Duration Over Time')
+            st.plotly_chart(fig)
+        else:
+            st.warning("No executions found")
 
     elif page == "Analytics":
         st.header("Workflow Analytics")
