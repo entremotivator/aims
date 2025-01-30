@@ -182,7 +182,7 @@ def main():
     elif page == "Executions":
     st.header("Workflow Executions")
     
-    col1, col2, col3, col4 = st.columns(4)
+    col1, col2, col3 = st.columns(3)
     
     with col1:
         workflows = manager.get_workflows()
@@ -193,73 +193,31 @@ def main():
         status = st.selectbox("Execution Status", ["All", "success", "error", "waiting"])
     
     with col3:
-        limit = st.number_input("Number of executions to show", min_value=1, max_value=250, value=100)
-    
-    with col4:
-        include_data = st.checkbox("Include Detailed Data", value=False)
+        limit = st.number_input("Number of executions to show", min_value=1, max_value=100, value=50)
     
     workflow_id = next((w['id'] for w in workflows['data'] if w['name'] == selected_workflow), None) if selected_workflow != "All Workflows" else None
-    
-    params = {
-        "limit": limit,
-        "includeData": include_data,
-        "status": status if status != "All" else None,
-        "workflowId": workflow_id
-    }
-    
-    executions = manager.get_executions(**params)
+    executions = manager.get_executions(
+        workflow_id=workflow_id, 
+        status=status if status != "All" else None,
+        limit=limit
+    )
     
     if executions and 'data' in executions:
         df = pd.DataFrame(executions['data'])
         df['startedAt'] = pd.to_datetime(df['startedAt'])
-        df['stoppedAt'] = pd.to_datetime(df['stoppedAt'])
-        df['duration'] = df['stoppedAt'] - df['startedAt']
+        df['duration'] = pd.to_timedelta(df['stoppedAt']) - pd.to_timedelta(df['startedAt'])
         
-        st.dataframe(df[['id', 'workflowId', 'status', 'startedAt', 'stoppedAt', 'duration']])
+        st.dataframe(df[['id', 'workflowName', 'status', 'startedAt', 'duration']])
         
-        st.subheader("Execution Details")
-        selected_execution = st.selectbox("Select an execution to view details", df['id'])
-        if selected_execution:
-            execution_details = manager.get_execution_details(selected_execution, include_data=include_data)
-            if execution_details:
-                st.json(execution_details)
+        st.subheader("Execution Status Distribution")
+        fig = px.pie(df, names='status', title='Execution Status Distribution')
+        st.plotly_chart(fig)
         
-        st.subheader("Execution Visualizations")
-        col1, col2 = st.columns(2)
-        
-        with col1:
-            st.write("Status Distribution")
-            fig = px.pie(df, names='status', title='Execution Status Distribution')
-            st.plotly_chart(fig)
-        
-        with col2:
-            st.write("Execution Duration Over Time")
-            fig = px.scatter(df, x='startedAt', y='duration', color='status', hover_data=['workflowId', 'id'],
-                             title='Execution Duration Over Time')
-            st.plotly_chart(fig)
-        
-        if 'nextCursor' in executions:
-            st.write(f"Next Cursor: {executions['nextCursor']}")
+        st.subheader("Execution Duration Over Time")
+        fig = px.scatter(df, x='startedAt', y='duration', color='status', title='Execution Duration Over Time')
+        st.plotly_chart(fig)
     else:
         st.warning("No executions found")
-
-def get_executions(self, workflow_id=None, status=None, limit=100, include_data=False, cursor=None):
-    params = {
-        "limit": min(limit, 250),
-        "includeData": str(include_data).lower(),
-    }
-    if workflow_id:
-        params["workflowId"] = workflow_id
-    if status:
-        params["status"] = status
-    if cursor:
-        params["cursor"] = cursor
-    return self.make_request("GET", "executions", params=params)
-
-def get_execution_details(self, execution_id, include_data=False):
-    params = {"includeData": str(include_data).lower()}
-    return self.make_request("GET", f"executions/{execution_id}", params=params)
-
 
     elif page == "Analytics":
         st.header("Workflow Analytics")
