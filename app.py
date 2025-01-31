@@ -174,11 +174,11 @@ st.markdown("""
 def navigate():
     with st.sidebar:
         st.markdown('''
-        <a href="https://github.com/TsLu1s/talknexus" target="_blank" style="text-decoration: none; color: inherit; display: block;">
+        <a href="https://entremotivator.com" target="_blank" style="text-decoration: none; color: inherit; display: block;">
             <div class="header-container" style="cursor: pointer;">
                 <div class="profile-section">
                     <div class="profile-info">
-                        <h1 style="font-size: 32px;">AIAGENTMS</h1>
+                        <h1 style="font-size: 32px;">AI AGENT MS</h1>
                         <span class="active-badge" style="font-size: 16px;">AI  Multi-Model Agent Manager </span>
                     </div>
                 </div>
