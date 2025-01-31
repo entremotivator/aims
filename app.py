@@ -1,8 +1,9 @@
 import streamlit as st
 import toml
+from streamlit.runtime.secrets import get_secrets
 
-# Load config file
-config = toml.load("config.toml")
+# Load config from secrets
+config = get_secrets("config")
 
 # Set page config
 st.set_page_config(
