@@ -35,3 +35,4 @@ streamlit-webrtc
 pydub
 duckduckgo-search
 toml
+streamlit_survey
