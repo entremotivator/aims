@@ -3,7 +3,7 @@ import st_pages
 from src import st_pages
 
 # Set page config
-st.set_page_config(page_title="AI Agent MS - Ollama Chatbot Multi-Model Interface", layout="wide", page_icon="🤖")
+st.set_page_config(page_title="AI Agent MS - Multi Agent Operations Interface", layout="wide", page_icon="🤖")
 
 # Load custom CSS from file
 def load_css(file_name):
@@ -22,7 +22,7 @@ st.markdown(f"""
     <div class="animated-bg"></div>
     <div class="header-content">
         <h1 class="header-title">AI Agent Management System</h1> 
-        <p class="header-subtitle">Advanced Language Models & Intelligent Conversations</p>
+        <p class="header-subtitle">Advanced Multi Agent Operations Interface & Intelligent systems</p>
     </div>
 </div>
 """, unsafe_allow_html=True)
@@ -232,9 +232,9 @@ except Exception as e:
 st.markdown("""
 <div class="footer">
     <div class="footer-content">
-        <p>© 2024 Powered by <a href="https://github.com/TsLu1s" target="_blank">TsLu1s</a>. 
-        Advanced Language Models & Intelligent Conversations
-        | Project Source: <a href="https://github.com/TsLu1s/talknexus" target="_blank"> TalkNexus</a></p>
+        <p>© 2025 Powered by <a href="https://Entremotivator.com" target="_blank">EntreMotivator</a>. 
+        Advanced Multi Agent Operations Interface
+        | Project Source: <a href="https://Entremotivator.com" target="_blank"> EntreMotivator</a></p>
     </div>
 </div>
 """, unsafe_allow_html=True)
