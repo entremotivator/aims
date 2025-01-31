@@ -1,0 +1,19 @@
+[server]
+enableCORS = false
+enableXsrfProtection = false
+
+[general]
+title = "AI Agent Management System"
+subtitle = "Advanced Language Models & Intelligent Conversations"
+
+[menu]
+items = [
+    { name = "Home", icon = "house-door", description = "Guidelines & Overview", badge = "Informative", color = "var(--primary-color)", url = "https://zrnrpwtg4wkiz7hgcbsl3a.streamlit.app/" },
+    { name = "Agent Chat", icon = "chat-dots", description = "Chat with AI Agents", badge = "Application", color = "var(--highlight-color)", url = "https://zrnrpwtg4wkiz7hgcbsl3a.streamlit.app/Agent_Chat" },
+    { name = "Dashboard", icon = "bar-chart", description = "Interactive Data Overview", badge = "Analytics", color = "var(--secondary-color)", url = "https://zrnrpwtg4wkiz7hgcbsl3a.streamlit.app/Dashboard" },
+    { name = "Agent Projects", icon = "folder", description = "Manage Agent Projects", badge = "Management", color = "var(--primary-color)", url = "https://zrnrpwtg4wkiz7hgcbsl3a.streamlit.app/Agent_Projects" },
+    { name = "Internet Agent", icon = "search", description = "Web-Savvy AI Agents", badge = "Exploration", color = "var(--highlight-color)", url = "https://zrnrpwtg4wkiz7hgcbsl3a.streamlit.app/Internet_Agent" },
+    { name = "AI Agent Roster", icon = "person-workspace", description = "AI Agent Directory", badge = "Information", color = "var(--secondary-color)", url = "https://zrnrpwtg4wkiz7hgcbsl3a.streamlit.app/AI_Agent_Roster" },
+    { name = "Agent Headquarters", icon = "building", description = "AI Base of Operations", badge = "HQ", color = "var(--primary-color)", url = "https://zrnrpwtg4wkiz7hgcbsl3a.streamlit.app/Agent_Headquarters" },
+    { name = "Agent Generator", icon = "gear", description = "Create Custom Agents", badge = "Tool", color = "var(--highlight-color)", url = "https://zrnrpwtg4wkiz7hgcbsl3a.streamlit.app/Agent_Generator" }
+]
