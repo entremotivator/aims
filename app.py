@@ -178,8 +178,8 @@ def navigate():
             <div class="header-container" style="cursor: pointer;">
                 <div class="profile-section">
                     <div class="profile-info">
-                        <h1 style="font-size: 32px;">TalkNexus</h1>
-                        <span class="active-badge" style="font-size: 16px;">AI Chatbot Multi-Model Application</span>
+                        <h1 style="font-size: 32px;">AIAGENTMS</h1>
+                        <span class="active-badge" style="font-size: 16px;">AI  Multi-Model Agent Manager </span>
                     </div>
                 </div>
             </div>
