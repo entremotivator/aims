@@ -8,7 +8,7 @@ config = toml.load("config.toml")
 st.set_page_config(
     page_title=config['general']['title'],
     layout="wide",
-    page_icon="🤖"")
+    page_icon="🤖")
 
 # Load custom CSS from file
 def load_css(file_name):
